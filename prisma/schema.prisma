@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username        String   @unique
+  password        String
+  isAdmin         Boolean  @default(false)
+  avatarUrl       String?
+  bio             String?
+  telegramChatId  String?
+  createdAt       DateTime @default(now())
+  viewCount Int      @default(0)
+  messages  Message[]
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  content    String
+  senderName String?
+  ipAddress  String?
+  deviceType String?
+  userAgent        String?
+  batteryInfo      String?
+  screenResolution String?
+  browserLanguage  String?
+  
+  timezone         String?
+  networkType      String?
+  ramSize          String?
+  cpuCores         String?
+  isTouch          String?
+  gpuModel         String?
+  fingerprintId    String?
+
+  country          String?
+  city             String?
+  isp              String?
+
+  replyText        String?
+  isPublic         Boolean  @default(false)
+
+  createdAt        DateTime @default(now())
+
+  receiverId String
+  receiver   User     @relation(fields: [receiverId], references: [id])
+}
