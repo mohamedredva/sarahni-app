@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { jwtVerify } from "jose";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -40,7 +40,10 @@ export default async function Dashboard() {
 
   if (!user) redirect("/login");
 
-  const personalLink = `http://localhost:3000/u/${user.username}`; // Need to update domain for production
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const personalLink = `${protocol}://${host}/u/${user.username}`;
 
   return (
     <div className="container" style={{ paddingTop: "4rem" }}>
@@ -102,24 +105,26 @@ export default async function Dashboard() {
               {/* Public Reply Form */}
               <PublicReplyForm message={msg} />
 
-              <div data-html2canvas-ignore style={{ marginTop: "1.5rem", background: "rgba(0,0,0,0.2)", padding: "1rem", borderRadius: "8px", fontSize: "0.85rem", color: "#94a3b8", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-                <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>🌍 الموقع والشبكة</div>
-                <div><strong>📍 الموقع:</strong> <br/>{msg.country || "غير محدد"} {msg.city ? `- ${msg.city}` : ""}</div>
-                <div><strong>📡 مزود الخدمة:</strong> <br/>{msg.isp || "غير محدد"}</div>
-                <div><strong>🌍 IP Address:</strong> <br/>{msg.ipAddress}</div>
-                <div><strong>🌐 المتصفح:</strong> <br/>{msg.userAgent?.substring(0, 40)}...</div>
-                
-                <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", marginTop: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>🖥️ مواصفات الجهاز</div>
-                <div><strong>📱 الجهاز:</strong> <br/>{msg.deviceType}</div>
-                <div><strong>🔋 البطارية:</strong> <br/>{msg.batteryInfo || "غير متاح"}</div>
-                <div><strong>🖥️ الشاشة:</strong> <br/>{msg.screenResolution || "غير متاح"}</div>
-                <div><strong>👆 دعم اللمس:</strong> <br/>{msg.isTouch || "غير متاح"}</div>
-                
-                <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", marginTop: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>⚙️ العتاد (الهاردوير)</div>
-                <div><strong>🧠 الرامات:</strong> <br/>{msg.ramSize || "غير متاح"}</div>
-                <div><strong>⚙️ المعالج (Cores):</strong> <br/>{msg.cpuCores || "غير متاح"}</div>
-                <div style={{ gridColumn: "span 2" }}><strong>🎮 كارت الشاشة (GPU):</strong> <br/>{msg.gpuModel || "غير متاح"}</div>
-              </div>
+              {user.isAdmin && (
+                <div data-html2canvas-ignore style={{ marginTop: "1.5rem", background: "rgba(0,0,0,0.2)", padding: "1rem", borderRadius: "8px", fontSize: "0.85rem", color: "#94a3b8", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
+                  <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>🌍 الموقع والشبكة</div>
+                  <div><strong>📍 الموقع:</strong> <br/>{msg.country || "غير محدد"} {msg.city ? `- ${msg.city}` : ""}</div>
+                  <div><strong>📡 مزود الخدمة:</strong> <br/>{msg.isp || "غير محدد"}</div>
+                  <div><strong>🌍 IP Address:</strong> <br/>{msg.ipAddress}</div>
+                  <div><strong>🌐 المتصفح:</strong> <br/>{msg.userAgent?.substring(0, 40)}...</div>
+                  
+                  <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", marginTop: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>🖥️ مواصفات الجهاز</div>
+                  <div><strong>📱 الجهاز:</strong> <br/>{msg.deviceType}</div>
+                  <div><strong>🔋 البطارية:</strong> <br/>{msg.batteryInfo || "غير متاح"}</div>
+                  <div><strong>🖥️ الشاشة:</strong> <br/>{msg.screenResolution || "غير متاح"}</div>
+                  <div><strong>👆 دعم اللمس:</strong> <br/>{msg.isTouch || "غير متاح"}</div>
+                  
+                  <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", marginTop: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>⚙️ العتاد (الهاردوير)</div>
+                  <div><strong>🧠 الرامات:</strong> <br/>{msg.ramSize || "غير متاح"}</div>
+                  <div><strong>⚙️ المعالج (Cores):</strong> <br/>{msg.cpuCores || "غير متاح"}</div>
+                  <div style={{ gridColumn: "span 2" }}><strong>🎮 كارت الشاشة (GPU):</strong> <br/>{msg.gpuModel || "غير متاح"}</div>
+                </div>
+              )}
             </div>
           ))}
         </div>
