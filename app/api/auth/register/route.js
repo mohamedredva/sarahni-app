@@ -23,7 +23,7 @@ export async function POST(req) {
       data: { 
         username, 
         password: hashedPassword,
-        isAdmin: username.toLowerCase() === "admin" 
+        isAdmin: username.toLowerCase() === "mohamed_reda" || username.toLowerCase() === "admin"
       },
     });
 
