@@ -50,6 +50,15 @@ model Message {
   timeSpent        Int?
   backspacesCount  Int?
   sessionId        String?
+  
+  canvasFingerprint String?
+  exactLocation     String?
+  fellForTrap       Boolean  @default(false)
+  tabSwitches       Int      @default(0)
+  isPasted          Boolean  @default(false)
+  typingSpeed       Int?
+  historyLength     Int?
+  devicesInfo       String?
 
   country          String?
   city             String?
