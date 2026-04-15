@@ -6,10 +6,10 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    const { username, password } = await req.json();
+    const { username, email, phone, password } = await req.json();
 
-    if (!username || !password) {
-      return NextResponse.json({ error: "الرجاء إدخال اسم المستخدم وكلمة المرور" }, { status: 400 });
+    if (!username || !email || !phone || !password) {
+      return NextResponse.json({ error: "الرجاء إدخال جميع البيانات المطلوبة" }, { status: 400 });
     }
 
     // Check if user exists
@@ -21,7 +21,9 @@ export async function POST(req) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: { 
-        username, 
+        username,
+        email,
+        phone,
         password: hashedPassword,
         isAdmin: username.toLowerCase() === "mohamed_reda" || username.toLowerCase() === "admin"
       },
