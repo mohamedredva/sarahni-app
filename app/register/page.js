@@ -6,6 +6,8 @@ import Link from "next/link";
 export default function Register() {
   const router = useRouter();
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +21,7 @@ export default function Register() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, email, phone, password }),
       });
       const data = await res.json();
 
@@ -36,20 +38,42 @@ export default function Register() {
   };
 
   return (
-    <div className="container" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-      <div className="glass-card" style={{ width: "100%", maxWidth: "400px" }}>
+    <div className="container" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh", padding: "2rem 0" }}>
+      <div className="glass-card" style={{ width: "100%", maxWidth: "450px" }}>
         <h2 style={{ textAlign: "center", marginBottom: "2rem" }}>إنشاء حساب جديد</h2>
         {error && <div style={{ background: "rgba(239, 68, 68, 0.2)", color: "#fca5a5", padding: "1rem", borderRadius: "8px", marginBottom: "1rem", textAlign: "center" }}>{error}</div>}
         
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label className="input-label">اسم المستخدم (بالإنجليزي - ليكون رابطك)</label>
+            <label className="input-label">الاسم (يستخدم لإنشاء رابطك)</label>
             <input 
               type="text" 
               className="input-field" 
               placeholder="مثال: ahmed123" 
               value={username}
               onChange={(e) => setUsername(e.target.value.toLowerCase().trim())}
+              required 
+            />
+          </div>
+          <div className="input-group">
+            <label className="input-label">البريد الإلكتروني</label>
+            <input 
+              type="email" 
+              className="input-field" 
+              placeholder="example@gmail.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required 
+            />
+          </div>
+          <div className="input-group">
+            <label className="input-label">رقم الموبايل</label>
+            <input 
+              type="tel" 
+              className="input-field" 
+              placeholder="رقم هاتفك" 
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               required 
             />
           </div>
