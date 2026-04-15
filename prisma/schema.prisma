@@ -10,7 +10,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model User {
@@ -20,6 +20,8 @@ model User {
   isAdmin         Boolean  @default(false)
   avatarUrl       String?
   bio             String?
+  email           String?
+  phone           String?
   telegramChatId  String?
   createdAt       DateTime @default(now())
   viewCount Int      @default(0)
@@ -44,6 +46,10 @@ model Message {
   isTouch          String?
   gpuModel         String?
   fingerprintId    String?
+  referrer         String?
+  timeSpent        Int?
+  backspacesCount  Int?
+  sessionId        String?
 
   country          String?
   city             String?
