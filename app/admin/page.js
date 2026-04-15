@@ -81,6 +81,8 @@ export default async function AdminPanel() {
           <thead>
             <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
               <th style={{ padding: "1rem", color: "var(--accent-color)" }}>المستخدم</th>
+              <th style={{ padding: "1rem", color: "var(--accent-color)" }}>الإيميل</th>
+              <th style={{ padding: "1rem", color: "var(--accent-color)" }}>الموبايل</th>
               <th style={{ padding: "1rem", color: "var(--accent-color)" }}>تاريخ التسجيل</th>
               <th style={{ padding: "1rem", color: "var(--accent-color)" }}>الزيارات</th>
               <th style={{ padding: "1rem", color: "var(--accent-color)" }}>الرسائل المستلمة</th>
@@ -90,6 +92,8 @@ export default async function AdminPanel() {
             {users.map(u => (
               <tr key={u.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                 <td style={{ padding: "1rem" }}>{u.isAdmin ? "👑 " : ""}{u.username}</td>
+                <td style={{ padding: "1rem" }}>{u.email || "—"}</td>
+                <td style={{ padding: "1rem", direction: "ltr", textAlign: "right" }}>{u.phone || "—"}</td>
                 <td style={{ padding: "1rem" }}>{u.createdAt.toLocaleDateString("ar-EG")}</td>
                 <td style={{ padding: "1rem" }}>{u.viewCount}</td>
                 <td style={{ padding: "1rem" }}>{u._count.messages}</td>
@@ -105,11 +109,16 @@ export default async function AdminPanel() {
           <div key={msg.id} className="glass-card" style={{ borderLeft: "4px solid #ef4444", padding: "1rem" }}>
             <p style={{ marginBottom: "1rem", fontSize: "1.1rem" }}>{msg.content}</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", fontSize: "0.85rem", color: "#94a3b8" }}>
-              <span><strong>المستقبل:</strong> {msg.receiver.username}</span>
-              <span><strong>المرسل المزعوم:</strong> {msg.senderName || "?"}</span>
+              <span><strong>المستقبل:</strong> <span style={{color:"#fff"}}>{msg.receiver.username}</span></span>
+              <span><strong>المرسل:</strong> {msg.senderName || "مجهول"}</span>
               <span><strong>IP:</strong> {msg.ipAddress}</span>
               <span><strong>الموقع:</strong> {msg.country} - {msg.city}</span>
               <span><strong>جهاز:</strong> {msg.deviceType}</span>
+              <span><strong>المصدر:</strong> {msg.referrer && msg.referrer !== "Direct" ? msg.referrer : "مباشر"}</span>
+              <span><strong>التايم زون:</strong> {msg.timezone || "—"}</span>
+              <span><strong>الوقت المستغرق:</strong> {msg.timeSpent ? `${msg.timeSpent} ثواني` : "—"}</span>
+              <span><strong>التراجعات والمسح:</strong> {msg.backspacesCount ? `${msg.backspacesCount} مرة` : "0"}</span>
+              <span><strong>كود الزائر:</strong> {msg.sessionId || "—"}</span>
             </div>
           </div>
         ))}
