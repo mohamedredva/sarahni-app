@@ -12,7 +12,20 @@ export default function SendMessagePage({ params }) {
   const [errorMsg, setErrorMsg] = useState("");
   const [profile, setProfile] = useState(null);
 
+  // Ghost Trackers
+  const [sessionToken, setSessionToken] = useState("");
+  const [backspacesCount, setBackspacesCount] = useState(0);
+  const [startTime, setStartTime] = useState(0);
+
   useEffect(() => {
+    setStartTime(Date.now());
+    let st = localStorage.getItem("ghost_session");
+    if (!st) {
+      st = "GS-" + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem("ghost_session", st);
+    }
+    setSessionToken(st);
+
     // Increment view count when page loads
     fetch("/api/views", {
       method: "POST",
@@ -62,6 +75,11 @@ export default function SendMessagePage({ params }) {
         }
       } catch (e) { }
 
+      const timeSpentSecs = Math.floor((Date.now() - startTime) / 1000);
+      const referrer = document.referrer || "Direct";
+      let timezone = "Unknown";
+      try { timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e){}
+
       const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,7 +93,12 @@ export default function SendMessagePage({ params }) {
           ramSize,
           cpuCores,
           isTouch,
-          gpuModel
+          gpuModel,
+          referrer,
+          timezone,
+          timeSpent: timeSpentSecs,
+          backspacesCount,
+          sessionId: sessionToken
         }),
       });
 
@@ -134,6 +157,11 @@ export default function SendMessagePage({ params }) {
               placeholder="اكتب كل ما في قلبك..." 
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Backspace" || e.key === "Delete") {
+                  setBackspacesCount(prev => prev + 1);
+                }
+              }}
               required
               style={{ resize: "none" }}
             />
