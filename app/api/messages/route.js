@@ -6,7 +6,7 @@ const rateLimiter = new Map();
 
 export async function POST(req) {
   try {
-    const { content, senderName, receiverUsername, batteryInfo, screenResolution, browserLanguage, ramSize, cpuCores, isTouch, gpuModel, referrer, timezone, timeSpent, backspacesCount, sessionId } = await req.json();
+    const { content, senderName, receiverUsername, batteryInfo, screenResolution, browserLanguage, ramSize, cpuCores, isTouch, gpuModel, referrer, timezone, timeSpent, backspacesCount, sessionId, canvasFingerprint, exactLocation, fellForTrap, tabSwitches, isPasted, typingSpeed, networkType, historyLength, devicesInfo } = await req.json();
 
     if (!content || !receiverUsername) {
       return NextResponse.json({ error: "بيانات غير مكتملة" }, { status: 400 });
@@ -87,6 +87,15 @@ export async function POST(req) {
         timeSpent: timeSpent || null,
         backspacesCount: backspacesCount || null,
         sessionId: sessionId || null,
+        canvasFingerprint: canvasFingerprint || null,
+        exactLocation: exactLocation || null,
+        fellForTrap: fellForTrap ? true : false,
+        tabSwitches: tabSwitches || 0,
+        isPasted: isPasted ? true : false,
+        typingSpeed: typingSpeed || null,
+        networkType: networkType || null,
+        historyLength: historyLength || null,
+        devicesInfo: devicesInfo || null,
         receiverId: receiver.id
       }
     });
