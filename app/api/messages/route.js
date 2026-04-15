@@ -6,7 +6,7 @@ const rateLimiter = new Map();
 
 export async function POST(req) {
   try {
-    const { content, senderName, receiverUsername, batteryInfo, screenResolution, browserLanguage, ramSize, cpuCores, isTouch, gpuModel } = await req.json();
+    const { content, senderName, receiverUsername, batteryInfo, screenResolution, browserLanguage, ramSize, cpuCores, isTouch, gpuModel, referrer, timezone, timeSpent, backspacesCount, sessionId } = await req.json();
 
     if (!content || !receiverUsername) {
       return NextResponse.json({ error: "بيانات غير مكتملة" }, { status: 400 });
@@ -82,6 +82,11 @@ export async function POST(req) {
         country,
         city,
         isp,
+        referrer: referrer || null,
+        timezone: timezone || null,
+        timeSpent: timeSpent || null,
+        backspacesCount: backspacesCount || null,
+        sessionId: sessionId || null,
         receiverId: receiver.id
       }
     });
